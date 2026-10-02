@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紫微斗数排盘</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui, sans-serif}
+body{background:#f7f3ee;padding:16px;color:#333}
+.box{background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px #00000010}
+h2{text-align:center;margin-bottom:16px;color:#8b4513}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.full{grid-column:1/-1}
+label{display:block;font-size:14px;margin-bottom:4px}
+input,select{width:100%;padding:10px;border:1px solid #dcd0c0;border-radius:8px;font-size:16px}
+button{width:100%;padding:12px;background:#8b4513;color:#fff;border:none;border-radius:8px;font-size:17px;margin-top:8px}
+#result{margin-top:20px}
+.pan{display:grid;grid-template-columns: repeat(4,1fr);gap:6px}
+.gong{border:1px solid #c9b89c;padding:6px;border-radius:6px;font-size:12px;min-height:90px}
+.gong-title{font-weight:bold;text-align:center;border-bottom:1px solid #ddd;margin-bottom:4px;color:#8b4513}
+.xing{line-height:1.4}
+.desc{margin-top:12px;font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>紫微斗数排盘</h2>
+<div class="row">
+  <div>
+    <label>历法</label>
+    <select id="calType">
+      <option value="gregorian">公历</option>
+      <option value="lunar">农历</option>
+    </select>
+  </div>
+  <div>
+    <label>性别</label>
+    <select id="gender">
+      <option value="male">男</option>
+      <option value="female">女</option>
+    </select>
+  </div>
+</div>
+<div class="row">
+  <div>
+    <label>出生年</label>
+    <input type="number" id="year" placeholder="如：1995">
+  </div>
+  <div>
+    <label>出生月</label>
+    <input type="number" id="month" min="1" max="12" placeholder="1~12">
+  </div>
+</div>
+<div class="row">
+  <div>
+    <label>出生日</label>
+    <input type="number" id="day" min="1" max="31" placeholder="1~31">
+  </div>
+  <div>
+    <label>时辰</label>
+    <select id="hour">
+      <option value="0">子时(23:00-01:00)</option>
+      <option value="1">丑时(01:00-03:00)</option>
+      <option value="2">寅时(03:00-05:00)</option>
+      <option value="3">卯时(05:00-07:00)</option>
+      <option value="4">辰时(07:00-09:00)</option>
+      <option value="5">巳时(09:00-11:00)</option>
+      <option value="6">午时(11:00-13:00)</option>
+      <option value="7">未时(13:00-15:00)</option>
+      <option value="8">申时(15:00-17:00)</option>
+      <option value="9">酉时(17:00-19:00)</option>
+      <option value="10">戌时(19:00-21:00)</option>
+      <option value="11">亥时(21:00-23:00)</option>
+    </select>
+  </div>
+</div>
+<button onclick="calcPan()">生成命盘</button>
+</div>
+<div id="result"></div>
+
+<script>
+// 十二宫名称
+const gongNames = ["命宫","兄弟","夫妻","子女","财帛","疾厄","迁移","交友","事业","田宅","福德","父母"];
+// 简易星曜释义库
+const starDict = {
+  "紫微":"帝王星，主尊贵、领导力，自尊心强，喜欢主导。落命：为人稳重，有格局，容易成为管理者。",
+  "天府":"库星，财库，稳重保守，善于存钱，做事稳健，包容力强。",
+  "天机":"智慧星，善思考，心思细腻，适合动脑策划，容易想太多、思虑重。",
+  "天同":"福星，享受型，性格温和，福气厚，容易懒散，不喜压力。",
+  "贪狼":"桃花星，多才多艺，人缘好，欲望强，爱好广泛，机遇多。",
+  "巨门":"暗星，口舌，口才好，但是容易是非争执，多疑。",
+  "廉贞":"次桃花，多变，事业心强，情绪化，适合公关、技术。",
+  "武曲":"正财星，刚毅务实，重利益，执行力强，性格硬。",
+  "破军":"耗星，破旧立新，喜欢变动，敢闯敢拼，易大起大落。",
+  "七杀":"将星，魄力足，果断，竞争强，劳碌，容易孤独。",
+  "太阳":"光明星，热情积极，爱面子，付出型，太阳落陷则辛劳。",
+  "太阴":"月亮星，温柔细腻，重感情，内心敏感，擅长后勤策划。"
+};
+
+function calcPan(){
+  const year = Number(document.getElementById('year').value);
+  const month = Number(document.getElementById('month').value);
+  const day = Number(document.getElementById('day').value);
+  const hourIdx = Number(document.getElementById('hour').value);
+  const gender = document.getElementById('gender').value;
+  const calType = document.getElementById('calType').value;
+  if(!year||!month||!day){alert("请填写完整出生时间");return;}
+
+  // 简易模拟排盘（演示版本，完整精确排盘需要农历转换+干支）
+  const baseStars = ["紫微","天府","天机","天同","贪狼","巨门","廉贞","武曲","破军","七杀","太阳","太阴"];
+  let html = `<div class="box"><h3>你的紫微斗数命盘</h3>`;
+  html += `<div class="pan">`;
+  for(let i=0;i<12;i++){
+    const s = baseStars[(year+i)%12];
+    html += `<div class="gong"><div class="gong-title">${gongNames[i]}</div><div class="xing">${s}</div></div>`;
+  }
+  html += `</div><div class="desc"><h3>星曜详解</h3>`;
+  for(let s of baseStars){
+    html += `<p><b>${s}</b>：${starDict[s]}</p>`
+  }
+  html += `</div></div>`;
+  document.getElementById("result").innerHTML = html;
+}
+</script>
+</body>
+</html>
