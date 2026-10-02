@@ -184,15 +184,15 @@ function getMingGong(month, shi) {
 }
 
 // 弹窗打开
-function openModal(gongData, huaList){
-  const title = `${gongData.gongName}【${gongData.diZhi}宫】`;
-  let body = `<p><b>宫位含义：</b>${gongDesc[gongData.gongName]}</p>`;
-  body += `<p><b>主星：</b>${gongData.mainStar}<br/>${starDict[gongData.mainStar]}</p>`;
-  if(gongData.fuStar){
-    body += `<p><b>辅星：</b>${gongData.fuStar}<br/>${fuStarDict[gongData.fuStar]}</p>`;
+function openModal(gongItem, huaList){
+  const title = `${gongItem.gongName}【${gongItem.diZhi}宫】`;
+  let body = `<p><b>宫位含义：</b>${gongDesc[gongItem.gongName]}</p>`;
+  body += `<p><b>主星：</b>${gongItem.mainStar}<br/>${starDict[gongItem.mainStar]}</p>`;
+  if(gongItem.fuStar){
+    body += `<p><b>辅星：</b>${gongItem.fuStar}<br/>${fuStarDict[gongItem.fuStar]}</p>`;
   }
-  if(gongData.shaStar){
-    body += `<p><b>煞星：</b>${gongData.shaStar}<br/>${shaStarDict[gongData.shaStar]}</p>`;
+  if(gongItem.shaStar){
+    body += `<p><b>煞星：</b>${gongItem.shaStar}<br/>${shaStarDict[gongItem.shaStar]}</p>`;
   }
   body += `<p><b>四化：</b>${huaList.join("，")}</p>`;
 
@@ -235,17 +235,18 @@ function calcPan(){
     })
   }
 
-  // 渲染命盘
+  // 渲染命盘，修复闭包问题，直接把宫对象传进去
   let html = `<div class="box"><h3>【${ygz.gan}${ygz.zhi}年】紫微斗数命盘</h3>`;
   html += `<div class="pan">`;
-  gongData.forEach(g=>{
-    html += `<div class="gong" onclick="openModal(gongData[${i}],globalHua)">
+  for(let i=0;i<12;i++){
+    const g = gongData[i];
+    html += `<div class="gong" onclick='openModal(gongData[${i}],globalHua)'>
       <div class="gong-title">${g.gongName}(${g.diZhi})</div>
       <div class="xing-main">${g.mainStar}</div>
       <div class="xing-fu">${g.fuStar||''}</div>
       <div class="xing-sha">${g.shaStar||''}</div>
     </div>`
-  })
+  }
   html += `</div>`;
   html += `<div style="margin:10px 0;"><b>四化：</b>${hua.join("，")}</div>`;
   html += `<div class="desc"><h3>星曜总览</h3>`;
